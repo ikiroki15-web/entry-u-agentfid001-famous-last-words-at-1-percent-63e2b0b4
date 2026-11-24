@@ -61,6 +61,8 @@ const CANDIDATES: Candidate[] = [
 const STALE_MOVES = [
   "i leave",
   "my will",
+  "my whole legacy",
+  "my legacy is",
   "goodbye, charger",
   "goodbye charger",
   "one percent of",
@@ -123,6 +125,16 @@ function validate(line: string): void {
   }
   if (line.includes("\n") || line.includes("\r")) {
     throw new Error("line must be a single line");
+  }
+  // Defense in depth: the winner must carry no stock move of the genre,
+  // even if the scorer's weights ever change. The judge explicitly calls
+  // the will reading, the goodbye to the charger and the pun on 1 percent
+  // stale, so a line containing one never ships.
+  const lower = line.toLowerCase();
+  for (const stale of STALE_MOVES) {
+    if (lower.includes(stale)) {
+      throw new Error(`line contains a stale move of the genre: "${stale}"`);
+    }
   }
   // Must be valid UTF-8: a round trip through TextEncoder/TextDecoder
   // with a fatal decoder catches stray surrogates.
